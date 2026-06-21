@@ -257,7 +257,8 @@ class GameModel:
             portal = self._generator.maybe_portal(platform.y)
             if portal is not None:
                 self.portals.append(portal)
-            enemy = self._generator.maybe_enemy(platform.y, height_climbed)
+            platform_score = (self._start_y - platform.y) / SCORE_DIVISOR
+            enemy = self._generator.maybe_enemy(platform.y, platform_score)
             if enemy is not None:
                 self.enemies.append(enemy)
             self._maybe_spawn_weapon(platform)

@@ -13,8 +13,8 @@ SPRING_JUMP_VELOCITY = -1500.0
 MOVE_SPEED = 360.0        # px/s horizontal
 
 # --- Player ---------------------------------------------------------------
-PLAYER_WIDTH = 46
-PLAYER_HEIGHT = 46
+PLAYER_WIDTH = 56
+PLAYER_HEIGHT = 56
 PLAYER_START_OFFSET_Y = 120  # distance from bottom at game start
 
 # --- Platforms ------------------------------------------------------------
@@ -55,8 +55,8 @@ PROJECTILE_HEIGHT = 24
 PROJECTILE_SPEED = -900.0         # upward velocity (px/s)
 
 # --- Enemies --------------------------------------------------------------
-ENEMY_SIZE = 48
-ENEMY_MIN_HEIGHT = 1000           # enemies start at the same height as weapons
+ENEMY_SIZE = 64
+ENEMY_MIN_HEIGHT = 1000           # in score units; enemies start like weapons
 
 # Hit points (number of player shots to kill), independent of weapon type.
 ZOMBIE_HP = 2
@@ -68,7 +68,7 @@ SPIDER_SPEED = 90.0               # horizontal patrol, like a moving platform
 SKELETON_SPEED = 70.0            # vertical patrol
 
 # Skeleton shooting.
-SKELETON_SHOOT_COOLDOWN = 1.0     # seconds between arrows
+SKELETON_SHOOT_COOLDOWN = 2.0     # seconds between arrows
 SKELETON_ARROW_SPEED = 320.0      # horizontal arrow speed (px/s)
 
 # Spawn chances per generated platform (zombie common, spider rarer, skeleton rare).

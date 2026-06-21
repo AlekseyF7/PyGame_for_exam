@@ -100,9 +100,11 @@ class LevelGenerator:
             x = SCREEN_WIDTH - PORTAL_SIZE - PORTAL_EDGE_MARGIN
         return Portal(x=x, y=near_y)
 
-    def maybe_enemy(self, near_y: float, height_climbed: float) -> Enemy | None:
-        """Maybe spawn an enemy near the given height once climbing has begun."""
-        if height_climbed < ENEMY_MIN_HEIGHT:
+    def maybe_enemy(self, near_y: float, height_score: float) -> Enemy | None:
+        """Maybe spawn an enemy. `height_score` is the platform height in score
+        units (same scale as the on-screen score), so the threshold matches the
+        weapon spawn heights (1000/2000/5000)."""
+        if height_score < ENEMY_MIN_HEIGHT:
             return None
         roll = self._rng.random()
         if roll < ZOMBIE_SPAWN_CHANCE:

@@ -50,7 +50,7 @@ class EnemyMovementTests(unittest.TestCase):
 
     def test_skeleton_shoots_periodically(self) -> None:
         skeleton = Skeleton(x=0.0, y=0.0, direction=1, min_y=-100.0, max_y=100.0)
-        for _ in range(70):  # ~1.12s, past the 1s cooldown
+        for _ in range(140):  # ~2.24s, past the 2s cooldown
             skeleton.update(0.016, self.model)
         self.assertGreaterEqual(len(self.model.enemy_projectiles), 1)
         self.assertGreater(self.model.enemy_projectiles[0].vx, 0)  # fires right
@@ -85,7 +85,7 @@ class EnemySpawnTests(unittest.TestCase):
     def test_no_enemies_before_min_height(self) -> None:
         generator = LevelGenerator(rng=random.Random(5))
         for _ in range(50):
-            self.assertIsNone(generator.maybe_enemy(near_y=-100.0, height_climbed=0.0))
+            self.assertIsNone(generator.maybe_enemy(near_y=-100.0, height_score=0.0))
 
     def test_skeleton_spawns_at_edge_facing_inward(self) -> None:
         generator = LevelGenerator(rng=random.Random(5))
@@ -95,6 +95,12 @@ class EnemySpawnTests(unittest.TestCase):
             self.assertEqual(skeleton.direction, 1)
         else:
             self.assertEqual(skeleton.direction, -1)
+
+    def test_no_enemies_below_min_height(self) -> None:
+        model = GameModel(rng=random.Random(2))
+        model.camera_y = -5000.0  # score ~560, below the 1000 threshold
+        model._spawn_above()
+        self.assertEqual(len(model.enemies), 0)
 
     def test_enemies_appear_when_climbing_high(self) -> None:
         model = GameModel(rng=random.Random(2))
