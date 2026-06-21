@@ -7,6 +7,8 @@ from src.config.constants import (
     COIN_SPAWN_CHANCE,
     ELYTRA_SIZE,
     ELYTRA_SPAWN_CHANCE,
+    ENEMY_MIN_HEIGHT,
+    ENEMY_SIZE,
     JUMP_VELOCITY,
     MOVING_PLATFORM_SPEED,
     PLATFORM_MAX_GAP_RATIO,
@@ -15,9 +17,23 @@ from src.config.constants import (
     PORTAL_EDGE_MARGIN,
     PORTAL_SIZE,
     PORTAL_SPAWN_CHANCE,
+    SCREEN_HEIGHT,
     SCREEN_WIDTH,
+    SKELETON_SPAWN_CHANCE,
+    SPIDER_SPAWN_CHANCE,
+    ZOMBIE_SPAWN_CHANCE,
 )
-from src.models.entities import Coin, Elytra, Platform, PlatformKind, Portal
+from src.models.entities import (
+    Coin,
+    Elytra,
+    Enemy,
+    Platform,
+    PlatformKind,
+    Portal,
+    Skeleton,
+    Spider,
+    Zombie,
+)
 from src.models.physics import max_jump_height
 
 
@@ -83,6 +99,32 @@ class LevelGenerator:
         else:
             x = SCREEN_WIDTH - PORTAL_SIZE - PORTAL_EDGE_MARGIN
         return Portal(x=x, y=near_y)
+
+    def maybe_enemy(self, near_y: float, height_climbed: float) -> Enemy | None:
+        """Maybe spawn an enemy near the given height once climbing has begun."""
+        if height_climbed < ENEMY_MIN_HEIGHT:
+            return None
+        roll = self._rng.random()
+        if roll < ZOMBIE_SPAWN_CHANCE:
+            return Zombie(x=self.random_x(), y=near_y)
+        if roll < ZOMBIE_SPAWN_CHANCE + SPIDER_SPAWN_CHANCE:
+            return Spider(x=self.random_x(), y=near_y)
+        if roll < ZOMBIE_SPAWN_CHANCE + SPIDER_SPAWN_CHANCE + SKELETON_SPAWN_CHANCE:
+            return self._make_skeleton(near_y)
+        return None
+
+    def _make_skeleton(self, near_y: float) -> Skeleton:
+        """Skeleton hugs an edge and shoots toward the centre."""
+        if self._rng.random() < 0.5:
+            x = 0.0
+            direction = 1            # on the left, fires right
+        else:
+            x = SCREEN_WIDTH - ENEMY_SIZE
+            direction = -1           # on the right, fires left
+        # Vertical patrol of one screen height, centred on the spawn point.
+        min_y = near_y - SCREEN_HEIGHT / 2
+        max_y = near_y + SCREEN_HEIGHT / 2
+        return Skeleton(x=x, y=near_y, direction=direction, min_y=min_y, max_y=max_y)
 
     def initial_platforms(self, start_y: float, count: int) -> list[Platform]:
         """Build the first column of platforms, all easy and reachable."""

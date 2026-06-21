@@ -92,6 +92,8 @@ class GameController:
     def _keys_playing(self, key: int) -> None:
         if key == pygame.K_ESCAPE:
             self._scene_state = SceneState.PAUSED
+        elif key == pygame.K_SPACE:
+            self._model.try_shoot()
 
     def _keys_paused(self, key: int) -> None:
         if key == pygame.K_ESCAPE:

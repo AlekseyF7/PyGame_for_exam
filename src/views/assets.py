@@ -24,7 +24,7 @@ class AssetManager:
         self._base = Path(base_dir)
         self._images: dict[tuple[str, tuple[int, int] | None, bool], pygame.Surface] = {}
         self._sounds: dict[str, "pygame.mixer.Sound | None"] = {}
-        self._fonts: dict[int, pygame.font.Font] = {}
+        self._fonts: dict[tuple[int, bool], pygame.font.Font] = {}
         self._volume = 1.0
 
     def image(
@@ -47,10 +47,11 @@ class AssetManager:
             self._sounds[name] = sound
         return self._sounds[name]
 
-    def font(self, size: int) -> pygame.font.Font:
-        if size not in self._fonts:
-            self._fonts[size] = pygame.font.SysFont(FONT_CANDIDATES, size)
-        return self._fonts[size]
+    def font(self, size: int, bold: bool = False) -> pygame.font.Font:
+        key = (size, bold)
+        if key not in self._fonts:
+            self._fonts[key] = pygame.font.SysFont(FONT_CANDIDATES, size, bold=bold)
+        return self._fonts[key]
 
     def set_volume(self, volume: float) -> None:
         self._volume = max(0.0, min(1.0, volume))
