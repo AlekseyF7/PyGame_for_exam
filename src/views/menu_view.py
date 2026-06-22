@@ -1,4 +1,4 @@
-"""Rendering of menus and the game-over screen (Russian UI)."""
+"""Отрисовка меню и экрана проигрыша (интерфейс на русском)."""
 
 import pygame
 
@@ -22,7 +22,7 @@ class MenuView:
     def __init__(self, screen: pygame.Surface, assets: AssetManager) -> None:
         self._screen = screen
         self._assets = assets
-        # Bold fonts so the text reads clearly over the artwork.
+        # Жирные шрифты, чтобы текст читался поверх картинки.
         self._title_font = assets.font(FONT_SIZE_TITLE, bold=True)
         self._font = assets.font(FONT_SIZE_NORMAL, bold=True)
         self._small_font = assets.font(FONT_SIZE_SMALL, bold=True)
@@ -65,7 +65,7 @@ class MenuView:
         color: tuple[int, int, int] = COLOR_MENU_TEXT,
     ) -> None:
         center_x = self._screen.get_width() // 2
-        # Drop shadow first for contrast against any background.
+        # Сначала тень — для контраста на любом фоне.
         shadow = font.render(text, True, COLOR_MENU_SHADOW)
         self._screen.blit(shadow, shadow.get_rect(center=(center_x + 2, y + 2)))
         surface = font.render(text, True, color)

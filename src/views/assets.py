@@ -1,8 +1,8 @@
-"""Asset loading for the View layer (images, sounds, fonts).
+"""Загрузка ресурсов для слоя View (картинки, звуки, шрифты).
 
-Only the View layer touches pygame and the filesystem for resources.
-Missing files are tolerated: images become labelled placeholders and sounds
-simply do not play, so the game runs even without final art.
+Только слой View работает с pygame и файлами ресурсов.
+Отсутствующие файлы не ломают игру: вместо картинки рисуется заглушка,
+а звук просто не проигрывается — игра запускается даже без финальной графики.
 """
 
 from pathlib import Path
@@ -33,7 +33,7 @@ class AssetManager:
         size: tuple[int, int] | None = None,
         smooth: bool = True,
     ) -> pygame.Surface:
-        """Load (and cache) an image. Use smooth=False for crisp pixel-art."""
+        """Загрузить (и закэшировать) картинку. smooth=False — для чёткого пиксель-арта."""
         key = (name, size, smooth)
         if key not in self._images:
             self._images[key] = self._load_image_or_placeholder(name, size, smooth)
@@ -53,13 +53,27 @@ class AssetManager:
             self._fonts[key] = pygame.font.SysFont(FONT_CANDIDATES, size, bold=bold)
         return self._fonts[key]
 
+    def play_music(self, name: str, volume: float = 1.0, loop: bool = True) -> None:
+        """Зациклить фоновую музыку. Если файла/звука нет — тихо ничего не делаем."""
+        if not pygame.mixer.get_init():
+            return
+        path = self._resolve_sound_path(name)
+        if path is None:
+            return
+        try:
+            pygame.mixer.music.load(str(path))
+            pygame.mixer.music.set_volume(volume)
+            pygame.mixer.music.play(-1 if loop else 0)
+        except pygame.error:
+            return
+
     def set_volume(self, volume: float) -> None:
         self._volume = max(0.0, min(1.0, volume))
         for sound in self._sounds.values():
             if sound is not None:
                 sound.set_volume(self._volume)
 
-    # Accept a file under any of these extensions, regardless of the name given.
+    # Принимаем файл с любым из этих расширений, независимо от заданного имени.
     _IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".bmp")
 
     def _resolve_image_path(self, name: str) -> Path | None:
@@ -83,14 +97,28 @@ class AssetManager:
                 if smooth:
                     surface = pygame.transform.smoothscale(surface, size)
                 else:
-                    # Nearest-neighbour keeps pixels crisp (Minecraft style).
+                    # Ближайший сосед сохраняет чёткие пиксели (стиль Minecraft).
                     surface = pygame.transform.scale(surface, size)
             return surface
         return self._make_placeholder(name, size or (64, 64))
 
+    # Принимаем звук с любым из этих расширений, независимо от заданного имени.
+    _SOUND_EXTENSIONS = (".ogg", ".mp3", ".wav")
+
+    def _resolve_sound_path(self, name: str) -> Path | None:
+        exact = self._base / SOUNDS_DIR / name
+        if exact.exists():
+            return exact
+        stem = exact.with_suffix("")
+        for ext in self._SOUND_EXTENSIONS:
+            candidate = stem.with_suffix(ext)
+            if candidate.exists():
+                return candidate
+        return None
+
     def _load_sound_or_none(self, name: str) -> "pygame.mixer.Sound | None":
-        path = self._base / SOUNDS_DIR / name
-        if not path.exists() or not pygame.mixer.get_init():
+        path = self._resolve_sound_path(name)
+        if path is None or not pygame.mixer.get_init():
             return None
         try:
             return pygame.mixer.Sound(str(path))

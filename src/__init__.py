@@ -1,1 +1,1 @@
-"""Doodle Jump source package."""
+"""Пакет с исходным кодом игры «Jump or die»."""

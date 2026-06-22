@@ -1,4 +1,4 @@
-"""Entry point for Doodle Jump."""
+"""Точка входа в игру «Jump or die»."""
 
 from src.controllers.game_controller import GameController
 

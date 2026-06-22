@@ -1,4 +1,4 @@
-"""Top-level game state for the jumper (pure logic, no pygame)."""
+"""Главное состояние игры-прыгалки (чистая логика, без pygame)."""
 
 import random
 
@@ -38,7 +38,7 @@ INITIAL_PLATFORM_COUNT = 12
 
 
 class GameModel:
-    """Holds player, platforms, items, hazards, camera and score."""
+    """Хранит игрока, платформы, предметы, опасности, камеру и счёт."""
 
     def __init__(self, rng: random.Random | None = None) -> None:
         self._generator = LevelGenerator(SCREEN_WIDTH, rng)
@@ -85,10 +85,10 @@ class GameModel:
         self.is_flying = False
         self._flight_target_y = 0.0
         self._start_y = self.player.y
-        # Weapons spawn once each, in ascending order of their height.
+        # Каждое оружие появляется один раз, по возрастанию высоты спавна.
         self._weapons_pending = sorted(WeaponKind, key=lambda w: w.spawn_height)
 
-    # --- Public effects used by collectibles ---------------------------
+    # --- Публичные эффекты, которые вызывают предметы ------------------
     def add_coin(self) -> None:
         self.coins += 1
 
@@ -97,12 +97,12 @@ class GameModel:
         self._flight_target_y = self.player.y - ELYTRA_BOOST_HEIGHT
 
     def equip_weapon(self, kind: WeaponKind) -> None:
-        """Equip a weapon; it stays until replaced. Ready to fire at once."""
+        """Экипировать оружие; оно остаётся до замены. Сразу готово к выстрелу."""
         self.current_weapon = kind
         self.fire_cooldown_remaining = 0.0
 
     def try_shoot(self) -> bool:
-        """Fire a projectile straight up if a weapon is ready. Returns success."""
+        """Выстрелить вверх, если оружие готово. Возвращает успех выстрела."""
         if self.current_weapon is None or self.fire_cooldown_remaining > 0.0:
             return False
         self.projectiles.append(
@@ -117,7 +117,7 @@ class GameModel:
         return True
 
     def spawn_enemy_projectile(self, x: float, y: float, vx: float) -> None:
-        """Create a horizontal enemy arrow centred on (x, y)."""
+        """Создать горизонтальную стрелу врага с центром в (x, y)."""
         self.enemy_projectiles.append(
             Projectile(
                 x=x - PROJECTILE_WIDTH / 2,
@@ -127,7 +127,7 @@ class GameModel:
             )
         )
 
-    # --- Main loop ------------------------------------------------------
+    # --- Главный цикл ---------------------------------------------------
     def update(self, dt: float, move_dir: int) -> None:
         if self.is_game_over:
             return
@@ -162,7 +162,7 @@ class GameModel:
         for projectile in self.projectiles:
             projectile.x += projectile.vx * dt
             projectile.y += projectile.vy * dt
-        # Player shots: keep live ones still on/below the screen top.
+        # Снаряды игрока: оставляем живые, что ещё не ушли за верх экрана.
         self.projectiles = [
             p for p in self.projectiles if p.alive and p.bottom >= self.camera_y
         ]
@@ -170,7 +170,7 @@ class GameModel:
         for projectile in self.enemy_projectiles:
             projectile.x += projectile.vx * dt
             projectile.y += projectile.vy * dt
-        # Enemy shots: drop those that flew off the sides.
+        # Стрелы врагов: убираем те, что улетели за боковые края.
         self.enemy_projectiles = [
             p for p in self.enemy_projectiles if p.alive and p.right > 0 and p.left < SCREEN_WIDTH
         ]
@@ -180,7 +180,7 @@ class GameModel:
             enemy.update(dt, self)
 
     def _hit_enemies_with_projectiles(self) -> None:
-        """Each player shot deals one hit; weapon type does not matter."""
+        """Каждый выстрел игрока наносит одно попадание; тип оружия не важен."""
         for projectile in self.projectiles:
             if not projectile.alive:
                 continue
@@ -191,7 +191,7 @@ class GameModel:
                     break
 
     def _check_enemy_contact(self) -> None:
-        """Any touch by an enemy or its arrow kills the player instantly."""
+        """Любое касание врага или его стрелы мгновенно убивает игрока."""
         for enemy in self.enemies:
             if enemy.alive and self.player.overlaps(enemy):
                 self.is_game_over = True
@@ -265,7 +265,7 @@ class GameModel:
             highest_y = platform.y
 
     def _maybe_spawn_weapon(self, platform: Platform) -> None:
-        """Place the next pending weapon once the platform reaches its height."""
+        """Положить следующее ожидающее оружие, когда платформа достигла его высоты."""
         platform_height = (self._start_y - platform.y) / SCORE_DIVISOR
         while self._weapons_pending and platform_height >= self._weapons_pending[0].spawn_height:
             kind = self._weapons_pending.pop(0)

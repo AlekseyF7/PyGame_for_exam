@@ -1,4 +1,4 @@
-"""Persistence for best score and settings (JSON)."""
+"""Сохранение рекорда и настроек (в JSON-файл)."""
 
 import json
 from pathlib import Path

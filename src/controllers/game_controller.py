@@ -1,4 +1,4 @@
-"""Main controller: owns the game loop and maps input to model changes."""
+"""Главный контроллер: владеет игровым циклом и связывает ввод с моделью."""
 
 from enum import Enum, auto
 
@@ -6,6 +6,8 @@ import pygame
 
 from src.config.constants import (
     FPS,
+    MUSIC_BACKGROUND,
+    MUSIC_VOLUME,
     SAVE_FILE_PATH,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
@@ -41,6 +43,8 @@ class GameController:
         self._assets.set_volume(self._volume)
         self._best_score = self._save_service.load_best_score()
         self._total_coins = self._save_service.load_total_coins()
+        # Фоновая музыка играет по кругу всё время работы игры.
+        self._assets.play_music(MUSIC_BACKGROUND, MUSIC_VOLUME)
 
         self._model = GameModel()
         self._game_view = GameView(self._screen, self._assets)
@@ -65,7 +69,7 @@ class GameController:
             pygame.display.flip()
         pygame.quit()
 
-    # --- Events ---------------------------------------------------------
+    # --- События --------------------------------------------------------
     def _handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -115,7 +119,7 @@ class GameController:
             direction += 1
         return direction
 
-    # --- Flow -----------------------------------------------------------
+    # --- Поток игры -----------------------------------------------------
     def _start_new_game(self) -> None:
         self._model.reset()
         self._scene_state = SceneState.PLAYING
@@ -135,7 +139,7 @@ class GameController:
             self._total_coins = self._save_service.add_coins(self._model.coins)
         self._scene_state = SceneState.GAME_OVER
 
-    # --- Render ---------------------------------------------------------
+    # --- Отрисовка ------------------------------------------------------
     def _render(self) -> None:
         if self._scene_state is SceneState.MAIN_MENU:
             self._menu_view.render_main_menu(self._best_score, self._total_coins)

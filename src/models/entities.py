@@ -1,4 +1,4 @@
-"""Game entities as pure data + geometry (no pygame)."""
+"""Игровые сущности как чистые данные + геометрия (без pygame)."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -74,7 +74,7 @@ _WEAPON_SPAWN_HEIGHTS = {
 
 
 class _AxisAlignedBox:
-    """Mixin providing AABB edges from (x, y, width, height)."""
+    """Примесь, дающая границы AABB из (x, y, width, height)."""
 
     x: float
     y: float
@@ -138,20 +138,20 @@ class Platform(_AxisAlignedBox):
     height: float = PLATFORM_HEIGHT
 
     def bounce_velocity(self) -> float:
-        """Upward velocity given to a player landing on this platform."""
+        """Скорость вверх, которую получает игрок при приземлении на платформу."""
         if self.kind is PlatformKind.SPRING:
             return SPRING_JUMP_VELOCITY
         return JUMP_VELOCITY
 
     def on_landed(self) -> None:
-        """Hook applied when a player lands; breakable platforms disappear."""
+        """Вызывается при приземлении игрока; ломающаяся платформа исчезает."""
         if self.kind is PlatformKind.BREAKABLE:
             self.alive = False
 
 
 @dataclass
 class Collectible(_AxisAlignedBox, ABC):
-    """Base class for items the player can pick up (OOP polymorphism)."""
+    """Базовый класс предметов, которые подбирает игрок (полиморфизм ООП)."""
 
     x: float
     y: float
@@ -161,7 +161,7 @@ class Collectible(_AxisAlignedBox, ABC):
 
     @abstractmethod
     def apply(self, model: "GameModel") -> None:
-        """Apply this item's effect to the game model when picked up."""
+        """Применить эффект предмета к модели игры при подборе."""
         raise NotImplementedError
 
 
@@ -185,7 +185,7 @@ class Elytra(Collectible):
 
 @dataclass
 class Portal(_AxisAlignedBox):
-    """Deadly hazard near a screen edge; touching it ends the run."""
+    """Смертельная опасность у края экрана; касание завершает забег."""
 
     x: float
     y: float
@@ -195,7 +195,7 @@ class Portal(_AxisAlignedBox):
 
 @dataclass
 class Weapon(Collectible):
-    """A weapon pickup lying on a platform; equips the player when collected."""
+    """Оружие-пикап на платформе; при подборе экипируется игроку."""
 
     kind: WeaponKind = WeaponKind.BOW
     width: float = WEAPON_SIZE
@@ -207,7 +207,7 @@ class Weapon(Collectible):
 
 @dataclass
 class Projectile(_AxisAlignedBox):
-    """A shot. Player shots fly up; enemy shots fly sideways."""
+    """Снаряд. Выстрелы игрока летят вверх; стрелы врагов — вбок."""
 
     x: float
     y: float
@@ -221,7 +221,7 @@ class Projectile(_AxisAlignedBox):
 
 @dataclass
 class Enemy(_AxisAlignedBox, ABC):
-    """Base enemy: kills the player on contact and has hit-point health."""
+    """Базовый враг: убивает игрока при контакте и имеет очки здоровья (HP)."""
 
     x: float
     y: float
@@ -231,20 +231,20 @@ class Enemy(_AxisAlignedBox, ABC):
     height: float = ENEMY_SIZE
 
     def hit(self) -> None:
-        """Take one shot, regardless of weapon type."""
+        """Получить одно попадание (тип оружия не важен)."""
         self.hp -= 1
         if self.hp <= 0:
             self.alive = False
 
     @abstractmethod
     def update(self, dt: float, model: "GameModel") -> None:
-        """Advance behaviour (movement / shooting) by dt seconds."""
+        """Обновить поведение (движение / стрельбу) за dt секунд."""
         raise NotImplementedError
 
 
 @dataclass
 class Zombie(Enemy):
-    """Static enemy; just stands where it spawned."""
+    """Статичный враг; просто стоит там, где появился."""
 
     hp: int = ZOMBIE_HP
 
@@ -254,7 +254,7 @@ class Zombie(Enemy):
 
 @dataclass
 class Spider(Enemy):
-    """Moves horizontally and bounces off the screen edges."""
+    """Двигается по горизонтали и отскакивает от краёв экрана."""
 
     hp: int = SPIDER_HP
     vx: float = SPIDER_SPEED
@@ -271,11 +271,11 @@ class Spider(Enemy):
 
 @dataclass
 class Skeleton(Enemy):
-    """Edge enemy: patrols vertically and shoots arrows horizontally."""
+    """Враг у края: патрулирует по вертикали и стреляет стрелами по горизонтали."""
 
     hp: int = SKELETON_HP
     vy: float = SKELETON_SPEED
-    direction: int = 1            # +1 shoots right, -1 shoots left
+    direction: int = 1            # +1 стреляет вправо, -1 влево
     min_y: float = 0.0
     max_y: float = 0.0
     arrow_speed: float = SKELETON_ARROW_SPEED

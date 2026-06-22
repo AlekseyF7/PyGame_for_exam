@@ -1,4 +1,4 @@
-"""Procedural platform generation with guaranteed reachability (no pygame)."""
+"""Процедурная генерация платформ с гарантией достижимости (без pygame)."""
 
 import random
 
@@ -38,12 +38,12 @@ from src.models.physics import max_jump_height
 
 
 class LevelGenerator:
-    """Creates platforms above the player while keeping each one reachable."""
+    """Создаёт платформы над игроком, сохраняя их достижимость."""
 
     def __init__(self, screen_width: int = SCREEN_WIDTH, rng: random.Random | None = None) -> None:
         self._screen_width = screen_width
         self._rng = rng or random.Random()
-        # Hard constraint: never place a platform higher than a jump can reach.
+        # Жёсткое ограничение: платформа не выше, чем можно допрыгнуть.
         self._max_gap_y = max_jump_height(JUMP_VELOCITY) * PLATFORM_MAX_GAP_RATIO
 
     @property
@@ -54,7 +54,7 @@ class LevelGenerator:
         return self._rng.uniform(0, self._screen_width - PLATFORM_WIDTH)
 
     def _pick_kind(self, height_climbed: float) -> PlatformKind:
-        """Harder platform types become more likely the higher you climb."""
+        """Чем выше поднялся игрок, тем чаще встречаются сложные типы платформ."""
         difficulty = min(height_climbed / 5000.0, 1.0)
         roll = self._rng.random()
         if roll < 0.10 + 0.10 * difficulty:
@@ -66,7 +66,7 @@ class LevelGenerator:
         return PlatformKind.STATIC
 
     def next_platform(self, highest_y: float, height_climbed: float = 0.0) -> Platform:
-        """Spawn one platform above `highest_y` within reachable distance."""
+        """Создать одну платформу над `highest_y` на достижимом расстоянии."""
         gap = self._rng.uniform(PLATFORM_MIN_GAP_Y, self._max_gap_y)
         new_y = highest_y - gap
         kind = self._pick_kind(height_climbed)
@@ -76,7 +76,7 @@ class LevelGenerator:
         return platform
 
     def maybe_item(self, platform: Platform) -> Coin | Elytra | None:
-        """Maybe place a collectible sitting on top of the given platform."""
+        """Возможно, положить предмет на верх данной платформы."""
         roll = self._rng.random()
         if roll < ELYTRA_SPAWN_CHANCE:
             return self._item_on(platform, Elytra, ELYTRA_SIZE)
@@ -91,7 +91,7 @@ class LevelGenerator:
         return item_cls(x=x, y=y)
 
     def maybe_portal(self, near_y: float) -> Portal | None:
-        """Maybe place a deadly portal near a screen edge at the given height."""
+        """Возможно, поставить смертельный портал у края экрана на данной высоте."""
         if self._rng.random() >= PORTAL_SPAWN_CHANCE:
             return None
         if self._rng.random() < 0.5:
@@ -101,9 +101,9 @@ class LevelGenerator:
         return Portal(x=x, y=near_y)
 
     def maybe_enemy(self, near_y: float, height_score: float) -> Enemy | None:
-        """Maybe spawn an enemy. `height_score` is the platform height in score
-        units (same scale as the on-screen score), so the threshold matches the
-        weapon spawn heights (1000/2000/5000)."""
+        """Возможно, создать врага. `height_score` — высота платформы в очках
+        (та же шкала, что и счёт на экране), поэтому порог совпадает с высотами
+        спавна оружия (1000/2000/5000)."""
         if height_score < ENEMY_MIN_HEIGHT:
             return None
         roll = self._rng.random()
@@ -116,20 +116,20 @@ class LevelGenerator:
         return None
 
     def _make_skeleton(self, near_y: float) -> Skeleton:
-        """Skeleton hugs an edge and shoots toward the centre."""
+        """Скелет держится края и стреляет к центру."""
         if self._rng.random() < 0.5:
             x = 0.0
-            direction = 1            # on the left, fires right
+            direction = 1            # слева — стреляет вправо
         else:
             x = SCREEN_WIDTH - ENEMY_SIZE
-            direction = -1           # on the right, fires left
-        # Vertical patrol of one screen height, centred on the spawn point.
+            direction = -1           # справа — стреляет влево
+        # Вертикальный патруль длиной в высоту экрана с центром в точке спавна.
         min_y = near_y - SCREEN_HEIGHT / 2
         max_y = near_y + SCREEN_HEIGHT / 2
         return Skeleton(x=x, y=near_y, direction=direction, min_y=min_y, max_y=max_y)
 
     def initial_platforms(self, start_y: float, count: int) -> list[Platform]:
-        """Build the first column of platforms, all easy and reachable."""
+        """Построить первый столбец платформ — все простые и достижимые."""
         platforms = [Platform(x=self._screen_width / 2 - PLATFORM_WIDTH / 2, y=start_y)]
         highest = start_y
         for _ in range(count):

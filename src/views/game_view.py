@@ -1,4 +1,4 @@
-"""Rendering of the gameplay scene (sky, ground, items, weapons, player, HUD)."""
+"""Отрисовка игровой сцены (небо, земля, предметы, оружие, игрок, HUD)."""
 
 import math
 
@@ -82,7 +82,7 @@ _PROJECTILE_IMAGES = {
     WeaponKind.RIFLE: IMAGE_PROJECTILE_RIFLE,
 }
 
-# Player poses per weapon (None = unarmed). Each entry: (idle_image, jump_image).
+# Позы игрока по оружию (None = без оружия). Каждая запись: (стоя, прыжок).
 _PLAYER_POSE_IMAGES = {
     None: (IMAGE_PLAYER, IMAGE_PLAYER_JUMP),
     WeaponKind.BOW: (IMAGE_PLAYER_BOW, IMAGE_PLAYER_BOW_JUMP),
@@ -118,7 +118,7 @@ class GameView:
         self._ground = self._scale_to_width(IMAGE_GROUND, SCREEN_WIDTH, smooth=True)
         self._ground_h = self._ground.get_height()
 
-        # Player poses: build idle/jump (+ flipped) for each weapon state.
+        # Позы игрока: готовим стоя/прыжок (+ отражённые) для каждого оружия.
         self._player_poses = {
             weapon: self._build_pose_set(idle_name, jump_name)
             for weapon, (idle_name, jump_name) in _PLAYER_POSE_IMAGES.items()
@@ -230,7 +230,7 @@ class GameView:
         elif player.vx > 0:
             self._facing_left = False
         pose = self._player_poses[model.current_weapon]
-        rising = player.vy < 0  # negative vy means moving upward
+        rising = player.vy < 0  # отрицательная vy означает движение вверх
         key = "jump" if rising else "idle"
         if self._facing_left:
             key += "_left"

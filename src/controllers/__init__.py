@@ -1,1 +1,1 @@
-"""Controller layer package."""
+"""Пакет слоя контроллеров."""
